@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="style.css"> 
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+        
+
+    <br> <br>  
+
+    <h1 id="h1"> sign in </h1>
+
+    <div id="database">
+        <input id="idInput" placeholder="enter id">
+        <br><br>
+        <input id="usernameInput" placeholder="enter username">
+        <br><br><br>
+        <button id="startBtn">Start</button>
+    </div>
+    <div id="game"> 
+        <div id="ship"> </div>
+        <div id="rock"> </div>
+    </div>
+
+   <h1 id="score">0</h1>
+   <h3 id="alert"></h3>
+
+    <video autoplay muted loop id="myVideo" width="1000" height="300">
+    <source src="stars.mp4" type="video/mp4">
+    </video>
+
+    <div id="message" style="display: none;"></div>
+
+
+
+   <script type=module> 
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-analytics.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+      
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+          apiKey: "AIzaSyC1o0qt4QG-CZtU-1d3ZhimFGVajbs43Wo",
+          authDomain: "cosmic-crusade-59751.firebaseapp.com",
+          databaseURL: "https://cosmic-crusade-59751-default-rtdb.asia-southeast1.firebasedatabase.app",
+          projectId: "cosmic-crusade-59751",
+          storageBucket: "cosmic-crusade-59751.appspot.com",
+          messagingSenderId: "332229158266",
+          appId: "1:332229158266:web:a7f48c187c04f29e4162c3",
+          measurementId: "G-24HWDV998Y"
+        };
+      
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+      
+  
+  
+  import {getDatabase, set, get, update,remove, ref, child}
+        from "https://www.gstatic.com/firebasejs/9.21.0/firebase-database.js"
+
+
+        const db = getDatabase();
+
+    // database code ends here 
+
+const ship = document.getElementById('ship');
+const rock = document.getElementById('rock');
+const score = document.getElementById('score');
+const game = document.getElementById('game')
+// Const for varibles for defining objects and things that won't be changed. 
+
+
+var startBtn = document.getElementById('startBtn');
+var idInput = document.getElementById('idInput');
+var usernameInput= document.getElementById('usernameInput');
+var signIn = document.getElementById('h1')
+var message = document.getElementById('message');
+
+ship.style.display = 'none';
+rock.style.display = 'none';
+score.style.display = 'none';
+game.style.display = 'none';
+
+
+startBtn.addEventListener('click', start);
+
+function test() {
+    const dbref = ref(db);
+
+    get(child(dbref, "People/" + idInput.value)) 
+            .then((snapshot)=>{
+                if(snapshot.exists() && usernameInput.value == snapshot.val().Name){ // if the id exists and the name matches, then you can start!
+                    console.log("worked")
+                    
+                } else {
+                    alert("No data found");
+                }
+            })
+}
+
+
+function start() {
+    const dbref = ref(db);
+
+    get(child(dbref, "People/" + idInput.value)) 
+            .then((snapshot)=>{
+                if(snapshot.exists() && usernameInput.value == snapshot.val().Name){ // if the id exists and the name matches, then you can start!
+                    startBtn.style.display = 'none';
+                    idInput.style.display = 'none';
+                    usernameInput.style.display = 'none';
+                    h1.style.display = 'none';
+
+                    rock.style.display = '';
+                    ship.style.display = '';
+                    score.style.display = '';
+                    game.style.display = '';
+                    // the code that hides and shows the game and the sign in. 
+
+                    setInterval(() => {
+                        const shipTop = parseInt(window.getComputedStyle(ship)
+                        .getPropertyValue('top'));
+                        const rockLeft = parseInt(window.getComputedStyle(rock)
+                        .getPropertyValue('left'));
+                        // looks at the positions of the animations 
+
+                        if (rockLeft < 1) {
+                            rock.style.display = 'none';
+                            score.innerText++;
+
+                        } else {
+                            rock.style.display = ''
+                        }
+
+                        if ((score.innerText) >= 10) {
+                            message.innerText = "You are so good!";
+                            message.style.display = '';
+                         }
+                         // The score is above 10 the inner text would be replaced with you are so good!
+                       
+
+                        if (rockLeft < 50 && rockLeft > 0 && shipTop > 150) {
+                            if ((snapshot.val().Highscore < score)) {
+                                update(ref(db, "People/" + idInput.value), {
+                                    Highscore: score.innerText
+                                    
+                                })
+                                alert("Your score is: " + score.innerText +
+                                " replay?" );
+                            location.reload();
+
+
+                            } else {
+                                alert("Your score is: " + score.innerText +
+                                    " replay?");
+                                location.reload();
+                            }
+
+                        }
+                    }, 50);
+
+                    document.addEventListener('keydown', (event) => {
+                        if (event.code == 'ArrowUp' && !ship.classList.contains('jump-animation') || event.code == 'Space' && !ship.classList.contains('jump-animation')) {
+                        jump();
+                        }
+                    });
+                    // event listener 
+
+                } else {
+                    alert("No data found");
+                }
+            })
+    
+
+}
+
+
+
+
+function jump() {
+    ship.classList.add("jump-animation");
+    setTimeout(() =>
+    ship.classList.remove("jump-animation"), 500);
+}
+
+
+</script> 
+
+</body>
+</html>
