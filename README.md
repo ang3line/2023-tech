@@ -1,1 +1,1 @@
-# 2023-tech
+# tech-project-2023
